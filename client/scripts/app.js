@@ -1,10 +1,21 @@
 const initializeSocketClient = () => {
-	// should be setup on the backend to recognize 'io'
-	const socket = io.connect('http://localhost:3000');
+	const socket = io.connect('http://localhost:3000', {
+		cors: {
+			origin: '*'
+		}
+	});
+
 	socket.on('connect', (data) => {
+		console.log('Connected');
+		console.log(data);
 		socket.emit('Hello from client');
 	});
 };
+
+const submitSong = (song) => {
+	console.log('Sending song:' + song);
+	socket.emit('guess', song);
+}
 
 const initializeMainContent = () => {
 	const mainContent = document.getElementById('mainContent');
