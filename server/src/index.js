@@ -1,7 +1,11 @@
 const app = require('./app');
-
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const setupSocketConnections = require('./socket');
 const port = process.env.PORT || 3000;
 
-app.listen(port, async () => {
+server.listen(port, async () => {
   console.log(`Server started - listening on port ${port}`);
 });
+
+setupSocketConnections(io);
