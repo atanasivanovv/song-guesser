@@ -1,3 +1,46 @@
+const mainContent = document.getElementById('mainContent');
+const gameContent = document.getElementById('gameContent');
+
+let numOfClients = 0;
+
+const clearMainContent = () => {
+	let childToDelete = mainContent.lastChild;
+
+	while (childToDelete) {
+		mainContent.removeChild(childToDelete);
+		childToDelete = mainContent.lastChild;
+	}
+}
+
+const handleGameStarting = (data) => {
+	gameContent.style.display = 'block';
+
+	const gameStarting = document.querySelector('.starting');
+
+	setTimeout(() => {
+		gameStarting.style.display = 'none';
+
+		handleShowSong(data);
+	}, 3000);
+}
+
+const handleShowSong = ({clientId}) => {
+	const playingAgainst = document.createElement('h2')
+	playingAgainst.innerText = `You are playing against client: ${clientId}`;
+	
+	const songPlayingHeader = document.createElement('h1');
+	songPlayingHeader.innerText = 'Guess the song which is currently playing:';
+
+	gameContent.appendChild(playingAgainst);
+	gameContent.appendChild(songPlayingHeader);
+}
+
+const handleGameStart = async (data) => {
+	clearMainContent();
+
+	handleGameStarting(data);
+}
+
 const initializeSocketClient = () => {
 	const socket = io.connect('http://localhost:3000', {
 		cors: {
@@ -7,9 +50,15 @@ const initializeSocketClient = () => {
 
 	socket.on('connect', (data) => {
 		console.log('Connected');
-		console.log(data);
+		numOfClients++;
+		console.log(numOfClients);
 		socket.emit('Hello from client');
 	});
+
+	socket.on('game_start', (data) => {
+		console.log('Game started!');
+		handleGameStart(data);
+	})
 };
 
 const submitSong = (song) => {
@@ -18,8 +67,6 @@ const submitSong = (song) => {
 }
 
 const initializeMainContent = () => {
-	const mainContent = document.getElementById('mainContent');
-
 	const connection = true; // should be setup with Socket IO
 	const loaderContainer = document.getElementById('loaderContainer');
 
