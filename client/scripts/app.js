@@ -1,8 +1,6 @@
 const mainContent = document.getElementById('mainContent');
 const gameContent = document.getElementById('gameContent');
 
-let numOfClients = 0;
-
 const clearMainContent = () => {
 	let childToDelete = mainContent.lastChild;
 
@@ -37,7 +35,6 @@ const handleShowSong = ({clientId}) => {
 
 const handleGameStart = async (data) => {
 	clearMainContent();
-
 	handleGameStarting(data);
 }
 
@@ -48,16 +45,13 @@ const initializeSocketClient = () => {
 		}
 	});
 
-	socket.on('connect', (data) => {
-		console.log('Connected');
-		numOfClients++;
-		console.log(numOfClients);
-		socket.emit('Hello from client');
-	});
-
 	socket.on('game_start', (data) => {
 		console.log('Game started!');
 		handleGameStart(data);
+		const songs = data.songs;
+		const audio = document.getElementById('audioPlayer');
+		audio.src = songs[0];
+		audio.play();
 	})
 };
 
@@ -66,26 +60,31 @@ const submitSong = (song) => {
 	socket.emit('guess', song);
 }
 
-const initializeMainContent = () => {
-	const connection = true; // should be setup with Socket IO
+const initializeLoader = () => {
 	const loaderContainer = document.getElementById('loaderContainer');
-
-	const loaderContainer2 = document.createElement('div');
-	loaderContainer2.className = 'loaderContainer';
-
 	const loader = document.createElement('div');
+	const loaderMessage = document.createElement('p');
+	loaderMessage.innerHTML = 'Searching for your oponent...';
 
 	loader.className = 'spinner';
 	loader.appendChild(document.createElement('div'));
 	loader.appendChild(document.createElement('div'));
 	loader.appendChild(document.createElement('div'));
+	
+	loaderContainer.appendChild(loaderMessage);
+	loaderContainer.appendChild(loader);
+}
 
-	if (connection) {
-		loaderContainer.appendChild(loader);
-	}
+const initializeMainContent = () => {
+	
+	const findOponentButton = document.getElementById('findBtn');
+	findOponentButton.addEventListener('click', () => {
+		findOponentButton.style.display = 'none';
+		initializeLoader();
+		initializeSocketClient();
+	})
 };
 
 (function () {
 	initializeMainContent();
-	initializeSocketClient();
 })();

@@ -5,16 +5,16 @@ const clients = [];
 const setupSocketConnections = (io) => {
   io.on('connection', (socket) => {
     console.log(`Client ${socket.id} connected`);
-
     clients.push(socket);
 
-    if (clients.length === 2) {
+    socket.on('guess', handlers.songGuessHandler(io, socket));
+    if (clients.length >= 2) {
       io.sockets.emit('game_start', {
-        song: 'example_song',
+        songs: [
+          'https://soundbible.com/mp3/Tyrannosaurus%20Rex%20Roar-SoundBible.com-807702404.mp3',
+        ],
       });
     }
-
-    socket.on('guess', handlers.songGuessHandler(io, socket));
 
     socket.on('disconnect', () => {
       clients.splice(clients.indexOf(socket), 1);
