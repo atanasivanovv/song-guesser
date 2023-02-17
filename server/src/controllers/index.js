@@ -1,9 +1,6 @@
-const axios = require('axios');
-const queryString = require('node:querystring');
-
-const BASE64_AUTH = Buffer.from(
-  process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_SECRET
-).toString('base64');
+const fs = require('fs');
+const path = require('path');
+const encryptService = require('../services/encrypt/index');
 
 const home = async (req, res) => {
   res.send(
@@ -11,52 +8,29 @@ const home = async (req, res) => {
   );
 };
 
-const getToken = async () => {
-  return await axios.post(
-    'https://accounts.spotify.com/api/token',
-    queryString.stringify({
-      grant_type: 'client_credentials',
-    }),
-    {
-      headers: {
-        Authorization: `Basic ${BASE64_AUTH}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }
-  );
-};
-
-const genres = async (req, res) => {
+const tracks = async (req, res) => {
   try {
-    const token = (await getToken()).data.access_token;
-    const genresResponse = await axios.get(
-      'https://api.spotify.com/v1/recommendations/available-genre-seeds',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    res.send(genresResponse.data.genres);
+    const encryptedSongs = [];
+    const DB_FOLDER_PATH = path.join(__dirname, '../music');
+    fs.readdir(DB_FOLDER_PATH, (err, files) => {
+      files.forEach((file) => {
+        encryptedSongs.push(encryptService.encrypt(file));
+      });
+      res.send(encryptedSongs);
+    });
   } catch (error) {
-    res.send(error.message);
+    res.send(error);
   }
 };
 
-const tracks = async (req, res) => {
+const song = async (req, res) => {
   try {
-    const token = (await getToken()).data.access_token;
-    const tracksResponse = await axios.get(
-      'https://api.spotify.com/v1/playlists/4jhLkh8niYrv02FYCxQv7n?si/tracks',
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const tracks = tracksResponse.data.tracks.items;
-    const tracksIds = tracks.map((element) => element.track.id);
-    res.send(tracksIds);
+    const { iv, encryptedData } = req.query;
+    const songName = encryptService.decrypt({ iv, encryptedData });
+    const filePath = path.join(__dirname, `../music/${songName}`);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    }
   } catch (error) {
     res.send(error);
   }
@@ -64,6 +38,6 @@ const tracks = async (req, res) => {
 
 module.exports = {
   home,
-  genres,
   tracks,
+  song,
 };

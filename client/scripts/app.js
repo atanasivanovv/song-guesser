@@ -1,5 +1,12 @@
 const mainContent = document.getElementById('mainContent');
 const gameContent = document.getElementById('gameContent');
+const songs = [];
+
+const prepareSongs = () => {
+	fetch('http://localhost:3000/songs')
+		.then(response => response.json())
+		.then(data => songs.push(...data));
+}
 
 const clearMainContent = () => {
 	let childToDelete = mainContent.lastChild;
@@ -53,6 +60,8 @@ const initializeSocketClient = () => {
 		audio.src = songs[0];
 		audio.play();
 	})
+
+	console.log(songs);
 };
 
 const submitSong = (song) => {
@@ -76,15 +85,29 @@ const initializeLoader = () => {
 }
 
 const initializeMainContent = () => {
-	
 	const findOponentButton = document.getElementById('findBtn');
+	
 	findOponentButton.addEventListener('click', () => {
 		findOponentButton.style.display = 'none';
 		initializeLoader();
 		initializeSocketClient();
+		const song = songs[0];
+		var queryString = Object.keys(song).map(key => key + '=' + song[key]).join('&');
+
+
+		fetch(`http://localhost:3000/song?${queryString}`)
+			.then(response => response.blob())
+			.then(blob => {
+				const url = URL.createObjectURL(blob);
+				const audio = document.getElementById('audioPlayer');
+				audio.src = url;
+				audio.play();
+			})
+		.catch(error => console.error(error));
 	})
 };
 
 (function () {
+	prepareSongs();
 	initializeMainContent();
 })();
