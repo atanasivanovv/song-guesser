@@ -1,6 +1,7 @@
 const mainContent = document.getElementById('mainContent');
 const gameContent = document.getElementById('gameContent');
 const songs = [];
+let currentSong = null;
 let socket = null;
 
 const prepareSongs = () => {
@@ -27,7 +28,7 @@ const handlePlayNextSong = () => {
 		})
 	.catch(error => console.error(error));	
 
-	songs.pop();
+	currentSong = songs.pop();
 }
 
 const clearMainContent = () => {
@@ -63,7 +64,7 @@ const handleShowSong = ({clientId}) => {
 	guessRightBtn.innerText = 'GUESS';
 	guessRightBtn.className = 'guessRightBtn';
 	guessRightBtn.addEventListener('click', () => {
-		socket.emit('guess', {guess: songInput.value, currentlyPlaying: songs[songs.length - 1]});
+		socket.emit('guess', {guess: songInput.value, currentlyPlaying: currentSong});
 	})
 	
 	const songPlayingHeader = document.createElement('h1');
@@ -100,7 +101,6 @@ const initializeSocketClient = () => {
 	})
 
 	socket.on('correct_guess', ({ correctSong }) => {
-		console.log(correctSong);
 		handlePlayNextSong();
 		incorrectGuess.style = 'display: none';
 	})
