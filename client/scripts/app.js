@@ -25,8 +25,8 @@ const handlePlayNextSong = () => {
 			audio.src = url;
 			audio.play();
 		})
-	.catch(error => console.error(error));
-	
+	.catch(error => console.error(error));	
+
 	songs.pop();
 }
 
@@ -52,18 +52,26 @@ const handleGameStarting = (data) => {
 
 const handleShowSong = ({clientId}) => {
 	const playingAgainst = document.createElement('h2');
-	const guessRightBtn = document.createElement('button');
-	guessRightBtn.innerText = 'GUESS';
-	guessRightBtn.addEventListener('click', () => {
-		socket.emit('guess');
-	})
 	playingAgainst.innerText = `You are playing against client: ${clientId}`;
+
+	const guessRightBtn = document.createElement('button');
+	
+	const songInput = document.createElement("input");
+	songInput.type = "text";
+	songInput.className = "songInput"; 
+
+	guessRightBtn.innerText = 'GUESS';
+	guessRightBtn.className = 'guessRightBtn';
+	guessRightBtn.addEventListener('click', () => {
+		socket.emit('guess', {guess: songInput.value, currentlyPlaying: songs[songs.length - 1]});
+	})
 	
 	const songPlayingHeader = document.createElement('h1');
 	songPlayingHeader.innerText = 'Guess the song which is currently playing:';
 
 	gameContent.appendChild(playingAgainst);
 	gameContent.appendChild(songPlayingHeader);
+	gameContent.appendChild(songInput);
 	gameContent.appendChild(guessRightBtn);
 }
 
@@ -71,6 +79,12 @@ const handleGameStart = async (data) => {
 	clearMainContent();
 	handleGameStarting(data);
 	handlePlayNextSong();
+}
+
+const incorrectGuess = document.getElementById('incorrectGuess');
+
+const handleGuessSongAgain = () => {
+	incorrectGuess.style = 'display: block; text-align: center; margin: 15px auto';
 }
 
 const initializeSocketClient = () => {
@@ -85,8 +99,14 @@ const initializeSocketClient = () => {
 		handleGameStart(data);
 	})
 
-	socket.on('correct_guess', () => {
+	socket.on('correct_guess', ({ correctSong }) => {
+		console.log(correctSong);
 		handlePlayNextSong();
+		incorrectGuess.style = 'display: none';
+	})
+
+	socket.on('guess-again', () => {
+		handleGuessSongAgain();
 	})
 };
 
