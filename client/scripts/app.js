@@ -42,20 +42,20 @@ const clearMainContent = () => {
 	}
 }
 
-const handleGameStarting = (data) => {
+const handleGameStarting = () => {
 	gameContent.style.display = 'block';
 
 	const gameStarting = document.querySelector('.starting');
 
 	setTimeout(() => {
 		gameStarting.style.display = 'none';
-		handleShowSong(data);
+		handleShowSong();
 	}, 1000);
 }
 
-const handleShowSong = ({clientId}) => {
+const handleShowSong = () => {
 	const playingAgainst = document.createElement('h2');
-	playingAgainst.innerText = `You are playing against client: Gosho?`;
+	playingAgainst.innerText = `You are playing against client: Pesho?`;
 
 	const guessRightBtn = document.createElement('button');
 	

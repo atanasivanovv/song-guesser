@@ -1,23 +1,21 @@
 const handlers = require('./handlers');
 
-const clients = [];
+const clients = {};
 
 const setupSocketConnections = (io) => {
   io.on('connection', (socket) => {
     console.log(`Client ${socket.id} connected`);
-    clients.push(socket);
+    clients[socket.id] = socket;
+    clients[socket.id]['points'] = 0;
+    clients[socket.id]['name'] = socket.id;
 
-    socket.on('guess', handlers.songGuessHandler(io, socket));
-    if (clients.length >= 2) {
-      io.sockets.emit('game_start', {
-        songs: [
-          'https://soundbible.com/mp3/Tyrannosaurus%20Rex%20Roar-SoundBible.com-807702404.mp3',
-        ],
-      });
+    socket.on('guess', handlers.songGuessHandler(io, socket, clients));
+    if (Object.keys(clients).length >= 2) {
+      io.sockets.emit('game_start');
     }
 
     socket.on('disconnect', () => {
-      clients.splice(clients.indexOf(socket), 1);
+      delete clients[socket.id];
       console.log('Client disconnected:', socket.id);
     });
   });
