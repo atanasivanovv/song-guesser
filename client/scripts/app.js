@@ -12,7 +12,10 @@ const prepareSongs = () => {
 }
 
 const handlePlayNextSong = () => {
+	const audio = document.getElementById('audioPlayer');
+
 	if (!songs?.length) {
+		audio.pause();
 		return;
 	}
 	const song = songs[songs.length - 1];
@@ -22,7 +25,6 @@ const handlePlayNextSong = () => {
 		.then(response => response.blob())
 		.then(blob => {
 			const url = URL.createObjectURL(blob);
-			const audio = document.getElementById('audioPlayer');
 			audio.src = url;
 			audio.play();
 		})
@@ -53,7 +55,7 @@ const handleGameStarting = (data) => {
 
 const handleShowSong = ({clientId}) => {
 	const playingAgainst = document.createElement('h2');
-	playingAgainst.innerText = `You are playing against client: ${clientId}`;
+	playingAgainst.innerText = `You are playing against client: Gosho?`;
 
 	const guessRightBtn = document.createElement('button');
 	
@@ -62,7 +64,9 @@ const handleShowSong = ({clientId}) => {
 	songInput.className = "songInput"; 
 
 	guessRightBtn.innerText = 'GUESS';
-	guessRightBtn.className = 'guessRightBtn';
+	guessRightBtn.className = 'button';
+	guessRightBtn.classList.add('guessRightBtn');
+	gameContent.appendChild(guessRightBtn);
 	guessRightBtn.addEventListener('click', () => {
 		socket.emit('guess', {guess: songInput.value, currentlyPlaying: currentSong});
 	})

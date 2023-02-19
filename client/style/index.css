@@ -20,14 +20,16 @@ h1, h2 {
 .songInput {
   display: block;
   margin: 0 auto;
-  text-align: center;
+  width: 250px;
+  height: 30px;
+  border-radius: 10px;
+  padding: 0 10px;
 }
 
 .guessRightBtn {
   display: block;
-  margin: 0 auto;
+  margin: 1em auto;
   text-align: center;
-  margin-top: 5px;
 }
 
 .button {
